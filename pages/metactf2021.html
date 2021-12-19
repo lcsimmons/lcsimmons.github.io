@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>MetaCTF 2021</title>
+        <link href="../style.css" rel="stylesheet" type="text/css" />
+    </head>
+    
+    <body>
+        <header>  
+            <div class="nav">
+                <h2> 
+                <a href="../index.html">Lane Simmons </a>| 
+                <a href="../about.html">About </a>|
+                <a href="https://github.com/lcsimmons">GitHub </a>|
+                <a href="../writeups.html">Writeups</a>
+                </h2>
+            </div>
+        </header>
+
+        <div class="container">
+            <div><h1>MetaCTF CyberGames 2021</h1></div>
+            <div class="postcontainer">
+
+                <h2 id="reverse-engineering">Reverse Engineering</h2>
+
+                <h3 id="source-code-shipping">Source Code Shipping</h3>
+
+                <blockquote>
+                    <p><em>Ever wondered what was in those absolutely massive desktop apps such as Slack, Discord, and other apps built using Electron JS? Well we&#39;ve created a small Electron-based app with a flag embedded in its source code for your perusal.</em></p>
+                    <p><em>You don&#39;t need to install or run the app to get the flag.</em></p>
+                </blockquote>
+                <p>In order to get to the app&#39;s source code, we first need to get to the app&#39;s .asar file. I ran binwalk on Setup.exe and after extracting, I navigated to the resources folder where I found app.asar.</p>
+                <p>Before unpacking anything, I made a folder for the sourcecode.</p>
+
+                <p><code>mkdir sourcecode</code></p>
+
+                <p>Then, I ran this to unpack the .asar</p>
+
+                <p><code>npx asar extract app.asar sourcecode</code></p>
+
+                <p>I took a look at what&#39;s inside app.js</p>
+
+                <pre><code class="lang-JavaScript">
+<span class="hljs-comment">// THE FL@G is right below this message!!</span>
+<span class="hljs-keyword">let</span> f = <span class="hljs-string">"TWV0YUNURnt5b3VfY29tcGxldGVkX0FfU2VhcmNoX0FuZF9SZXNjdWVfdGhlX2ZsYWdfbWlzc2lvbn0="</span></code></pre>
+                <p><em>Interesting</em></p>
+
+                <p><code>echo TWV0YUNURnt5b3VfY29tcGxldGVkX0FfU2VhcmNoX0FuZF9SZXNjdWVfdGhlX2ZsYWdfbWlzc2lvbn0= | base64 -d</code></p>
+                <p><strong>MetaCTF{you_completed_A_Search_And_Rescue_the_flag_mission}</strong></p>
+
+                <!-- <h3>Revvy Chevy</h3>
+                <h3>Daryll Vault</h3> -->
+            </div>
+            
+        </div>
+    </body>
+</html>
