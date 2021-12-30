@@ -1,5 +1,5 @@
 header {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     padding-bottom: 1rem; 
 }
 
@@ -42,12 +42,12 @@ a:hover {
     color: #7F978C;
 }
 
-#headline, #resume {
-    color: #52796F
+#headline {
+    color: #52796F;
 }
 
 h1, h2, h3, h4, h5, h6, p, pre code {
     font-weight: bold;
-    margin-top: 1em;
+    margin-top: .5em;
     margin-bottom: .5em;
 }
