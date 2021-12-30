@@ -54,15 +54,11 @@
                     <p id="flag">MetaCTF{you_completed_A_Search_And_Rescue_the_flag_mission}</p>
                     
                 </details>
-                
+
                 <script>
-                    var flagVis = document.getElementById('flag');
                     var button = document.getElementById('reveal flag');
 
                     button.onclick = function() {
-                        if (flagVis.style.display === 'none')
-                            flagVis.style.display = 'block';
-                        button.style.display = 'none';
                         confetti({
                             particles: 150,
                             angle: 60,
