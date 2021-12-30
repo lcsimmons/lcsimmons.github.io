@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width">
         <title>MetaCTF 2021</title>
         <link href="../style.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
     </head>
     
     <body>
@@ -12,9 +13,9 @@
             <div class="nav">
                 <h2> 
                 <a href="../index.html">Lane Simmons </a>| 
-                <a href="../about.html">About </a>|
+                <a href="./about.html">About </a>|
                 <a href="https://github.com/lcsimmons">GitHub </a>|
-                <a href="../writeups.html">Writeups</a>
+                <a href="./writeups.html">Writeups</a>
                 </h2>
             </div>
         </header>
@@ -23,7 +24,7 @@
             <div><h1>MetaCTF CyberGames 2021</h1></div>
             <div class="postcontainer">
 
-                <h2 id="reverse-engineering">Reverse Engineering</h2>
+                <center><h2 id="reverse-engineering">Reverse Engineering</h2></center>
 
                 <h3 id="source-code-shipping">Source Code Shipping</h3>
 
@@ -42,18 +43,45 @@
 
                 <p>I took a look at what&#39;s inside app.js</p>
 
-                <pre><code class="lang-JavaScript">
-<span class="hljs-comment">// THE FL@G is right below this message!!</span>
+                <pre><code class="lang-JavaScript"><span class="hljs-comment">// THE FL@G is right below this message!!</span>
 <span class="hljs-keyword">let</span> f = <span class="hljs-string">"TWV0YUNURnt5b3VfY29tcGxldGVkX0FfU2VhcmNoX0FuZF9SZXNjdWVfdGhlX2ZsYWdfbWlzc2lvbn0="</span></code></pre>
                 <p><em>Interesting</em></p>
 
                 <p><code>echo TWV0YUNURnt5b3VfY29tcGxldGVkX0FfU2VhcmNoX0FuZF9SZXNjdWVfdGhlX2ZsYWdfbWlzc2lvbn0= | base64 -d</code></p>
-                <p><strong>MetaCTF{you_completed_A_Search_And_Rescue_the_flag_mission}</strong></p>
+                
+                <details>
+                    <summary id="reveal flag">Reveal Flag</summary>
+                    <p id="flag">MetaCTF{you_completed_A_Search_And_Rescue_the_flag_mission}</p>
+                    
+                </details>
+                
+                <script>
+                    var flagVis = document.getElementById('flag');
+                    var button = document.getElementById('reveal flag');
+
+                    button.onclick = function() {
+                        if (flagVis.style.display === 'none')
+                            flagVis.style.display = 'block';
+                        button.style.display = 'none';
+                        confetti({
+                            particles: 150,
+                            angle: 60,
+                            spread: 66,
+                            origin: { x: 0 }
+                        });
+                        confetti({
+                            particles: 150,
+                            angle: 120,
+                            spread: 66,
+                            origin: { x: 1 },
+                        });
+                    };
+                                           
+                </script>
 
                 <!-- <h3>Revvy Chevy</h3>
                 <h3>Daryll Vault</h3> -->
             </div>
-            
         </div>
     </body>
 </html>
