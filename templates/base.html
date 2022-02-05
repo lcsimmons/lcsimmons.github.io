@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Lane Simmons 🤠</title>
+  <link rel="stylesheet" href="{{ get_url(path="style.css", trailing_slash=false)}}">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+  <header>  
+    <div class="nav">
+        <h2> 
+        <a href="/blog">Lane Simmons </a>|
+        <a href="https://github.com/lcsimmons">GitHub</a>
+        </h2>
+    </div>
+  </header>
+  <section class="section">
+    <div class="container">
+      {% block content %} {% endblock %}
+    </div>
+  </section>
+</body>
+
+</html>
