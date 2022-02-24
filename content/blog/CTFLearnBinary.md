@@ -138,8 +138,9 @@ ___
 
 h e a p 
 
-We are given the source: 
-
+<details>
+  <summary id="source">View Source</summary>
+  
 ```c
 #include <stdlib.h>
 #include <stdio.h>
@@ -237,8 +238,9 @@ int main() {
   }
 }
 ```
+</details>
 
-Use after free time 😎
+After seeing free and malloc, I figured it was use after free time 😎
 
 ```python
 from pwn import *
@@ -299,9 +301,9 @@ What is 1 + 1 = 2
 No dummy... 1 + 1 != 0...
 ```
 
-So, how do we get it to say "1 + 1 != 0..."
+So, how do we get it to not say "1 + 1 != 0..."?
 
-I honestly just solved this challenge with trial and error. I first tried to find the buffer, and once I was able to see how I could modify values, I adjusted so that 1 + 1 would be set to 2. 
+I honestly solved this challenge with trial and error. I first tried to find the buffer, and once I was able to see how I could modify values, I adjusted so that 1 + 1 would be set to 2. 
 
 ```python
 from pwn import *
