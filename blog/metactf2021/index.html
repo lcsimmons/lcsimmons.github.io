@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Lane Simmons 🤠</title>
+  <link rel="stylesheet" href="https://lcsimmons.github.io/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+  <header>  
+    <div class="nav">
+        <h3> 
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;lcsimmons.github.io&#x2F;">Lane Simmons </a></li>
+            <li><a href="/blog">Writeups </a></li>
+            <li><a href="https://github.com/lcsimmons">GitHub</a></li>
+          </ul>
+        </h3>
+    </div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<div class="container">
+  <h1 class="title">
+    MetaCTF 2021
+  </h1>
+  
+  <div class="postcontainer">
+    <center>
+<h2 id="reverse-engineering">Reverse Engineering</h2>
+</center>
+<h3 id="source-code-shipping">Source Code Shipping</h3>
+<blockquote>
+<p><em>Ever wondered what was in those absolutely massive desktop apps such as Slack, Discord, and other apps built using Electron JS? Well we've created a small Electron-based app with a flag embedded in its source code for your perusal.</em></p>
+<p><em>You don't need to install or run the app to get the flag.</em></p>
+</blockquote>
+<p>In order to get to the app's source code, we first need to get to the app's .asar file. I ran binwalk on Setup.exe and after extracting, I navigated to the resources folder where I found app.asar.</p>
+<p>Before unpacking anything, I made a folder for the sourcecode.</p>
+<p>Then, I ran this to unpack the .asar</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>npx asar extract app.asar sourcecode
+</span></code></pre>
+<p>I took a look at what's inside app.js</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#65737e;">// THE FL@G is right below this message!!
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">f </span><span>= &quot;</span><span style="color:#a3be8c;">TWV0YUNURnt5b3VfY29tcGxldGVkX0FfU2VhcmNoX0FuZF9SZXNjdWVfdGhlX2ZsYWdfbWlzc2lvbn0=</span><span>&quot; 
+</span></code></pre>
+<p><em>base64 time</em></p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>echo TWV0YUNURnt5b3VfY29tcGxldGVkX0FfU2VhcmNoX0FuZF9SZXNjdWVfdGhlX2ZsYWdfbWlzc2lvbn0= | base64 -d
+</span></code></pre>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">MetaCTF{you_completed_A_Search_And_Rescue_the_flag_mission}</p>
+</details>
+<hr />
+<h3 id="revvy-chevvy">Revvy Chevvy</h3>
+<blockquote>
+<p><em>1 Flag, 2 Flag, Red Flag, Blue Flag. Encrypting flags is as easy as making a rhyme</em></p>
+</blockquote>
+<p>We are given <code>chall</code>. I opened it in Ghidra and navigated to <code>entry</code>. I clicked on the first argument of <code>__libc_start_main()</code> to get to our main function. </p>
+<pre data-lang="cpp" style="background-color:#2b303b;color:#c0c5ce;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#b48ead;">void</span><span>)
+</span><span>
+</span><span>{
+</span><span>  </span><span style="color:#b48ead;">char</span><span> cVar1;
+</span><span>  </span><span style="color:#b48ead;">int</span><span> iVar2;
+</span><span>  </span><span style="color:#b48ead;">char </span><span>*userinput;
+</span><span>  size_t </span><span style="color:#bf616a;">sVar3</span><span>;
+</span><span>  </span><span style="color:#b48ead;">long</span><span> counter;
+</span><span>  </span><span style="color:#b48ead;">long</span><span> in_FS_OFFSET;
+</span><span>  undefined8 local_68;
+</span><span>  undefined8 local_60;
+</span><span>  undefined8 local_58;
+</span><span>  undefined8 local_50;
+</span><span>  undefined8 local_48;
+</span><span>  undefined8 local_40;
+</span><span>  undefined8 local_38;
+</span><span>  undefined8 local_30;
+</span><span>  </span><span style="color:#b48ead;">long</span><span> local_20;
+</span><span>  
+</span><span>  local_20 = *(</span><span style="color:#b48ead;">long </span><span>*)(in_FS_OFFSET + </span><span style="color:#d08770;">0x28</span><span>);
+</span><span>  </span><span style="color:#bf616a;">__printf_chk</span><span>(</span><span style="color:#d08770;">1</span><span>,&quot;</span><span style="color:#a3be8c;">What</span><span style="color:#96b5b4;">\&#39;</span><span style="color:#a3be8c;">s the flag? </span><span>&quot;);
+</span><span>  local_68 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_60 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_58 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_50 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_48 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_40 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_38 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  local_30 = </span><span style="color:#d08770;">0</span><span>;
+</span><span>  userinput = </span><span style="color:#96b5b4;">fgets</span><span>((</span><span style="color:#b48ead;">char </span><span>*)&amp;local_68,</span><span style="color:#d08770;">0x40</span><span>,stdin);
+</span><span>  </span><span style="color:#b48ead;">if </span><span>(userinput == (</span><span style="color:#b48ead;">char </span><span>*)</span><span style="color:#d08770;">0x0</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">no!!</span><span>&quot;);
+</span><span>    iVar2 = </span><span style="color:#d08770;">1</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">else </span><span>{
+</span><span>    </span><span style="color:#bf616a;">sVar3 </span><span>= </span><span style="color:#96b5b4;">strcspn</span><span>((</span><span style="color:#b48ead;">char </span><span>*)&amp;local_68,&quot;</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    *(undefined *)((</span><span style="color:#b48ead;">long</span><span>)&amp;local_68 + </span><span style="color:#bf616a;">sVar3</span><span>) = </span><span style="color:#d08770;">0</span><span>;
+</span><span>    counter = </span><span style="color:#d08770;">0</span><span>;
+</span><span>    </span><span style="color:#b48ead;">do </span><span>{
+</span><span>      cVar1 = </span><span style="color:#bf616a;">FUN_001011e9</span><span>();
+</span><span>      *(byte *)((</span><span style="color:#b48ead;">long</span><span>)&amp;local_68 + counter) =
+</span><span>           *(byte *)((</span><span style="color:#b48ead;">long</span><span>)&amp;local_68 + counter) ^ cVar1 + (</span><span style="color:#b48ead;">char</span><span>)counter;
+</span><span>      counter = counter + </span><span style="color:#d08770;">1</span><span>;
+</span><span>    } </span><span style="color:#b48ead;">while </span><span>(counter != </span><span style="color:#d08770;">0x40</span><span>);
+</span><span>    iVar2 = </span><span style="color:#96b5b4;">memcmp</span><span>(&amp;local_68,PTR_s_t_N_Gd_-_Z_\_;</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">o_</span><span>@_|W_v/_W_O_o_y_00104010,</span><span style="color:#d08770;">0x40</span><span>);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(iVar2 == </span><span style="color:#d08770;">0</span><span>) {
+</span><span>      </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">You got it!</span><span>&quot;);
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">else </span><span>{
+</span><span>      </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">That</span><span style="color:#96b5b4;">\&#39;</span><span style="color:#a3be8c;">s not it...</span><span>&quot;);
+</span><span>      iVar2 = </span><span style="color:#d08770;">1</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">if </span><span>(local_20 == *(</span><span style="color:#b48ead;">long </span><span>*)(in_FS_OFFSET + </span><span style="color:#d08770;">0x28</span><span>)) {
+</span><span>    </span><span style="color:#b48ead;">return</span><span> iVar2;
+</span><span>  }
+</span><span>                    </span><span style="color:#65737e;">/* WARNING: Subroutine does not return */
+</span><span>  </span><span style="color:#bf616a;">__stack_chk_fail</span><span>();
+</span><span>}
+</span></code></pre>
+<p>After viewing this, I figured that we needed our user input, <code>local_68</code>, to match whatever is stored in <code>PTR_s_t_N_Gd_-_Z_\_;0o_@_|W_v/_W_O_o_y_00104010</code>, and we needed to decrypt what is stored in memory. </p>
+<p>I first got the value of our encyrpted flag through clicking the pointer that we memory compare to <code>local_68</code>, clicking on what that is pointing too, then copying it as a python list.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>[ </span><span style="color:#d08770;">0x74</span><span>, </span><span style="color:#d08770;">0x1a</span><span>, </span><span style="color:#d08770;">0x95</span><span>, </span><span style="color:#d08770;">0x4e</span><span>, </span><span style="color:#d08770;">0xba</span><span>, </span><span style="color:#d08770;">0xdb</span><span>, </span><span style="color:#d08770;">0x47</span><span>, </span><span style="color:#d08770;">0x64</span><span>, </span><span style="color:#d08770;">0x09</span><span>, </span><span style="color:#d08770;">0x2d</span><span>, </span><span style="color:#d08770;">0xd1</span><span>, </span><span style="color:#d08770;">0xbf</span><span>, </span><span style="color:#d08770;">0x8a</span><span>, </span><span style="color:#d08770;">0x9d</span><span>, </span><span style="color:#d08770;">0xde</span><span>, </span><span style="color:#d08770;">0x5a</span><span>, </span><span style="color:#d08770;">0xd7</span><span>, </span><span style="color:#d08770;">0x5c</span><span>, </span><span style="color:#d08770;">0x93</span><span>, </span><span style="color:#d08770;">0x16</span><span>, </span><span style="color:#d08770;">0x09</span><span>, </span><span style="color:#d08770;">0x3b</span><span>, </span><span style="color:#d08770;">0x30</span><span>, </span><span style="color:#d08770;">0x6f</span><span>, </span><span style="color:#d08770;">0x97</span><span>, </span><span style="color:#d08770;">0x40</span><span>, </span><span style="color:#d08770;">0xd0</span><span>, </span><span style="color:#d08770;">0x7c</span><span>, </span><span style="color:#d08770;">0x57</span><span>, </span><span style="color:#d08770;">0xdb</span><span>, </span><span style="color:#d08770;">0xde</span><span>, </span><span style="color:#d08770;">0x0c</span><span>, </span><span style="color:#d08770;">0x09</span><span>, </span><span style="color:#d08770;">0xa0</span><span>, </span><span style="color:#d08770;">0x84</span><span>, </span><span style="color:#d08770;">0x9b</span><span>, </span><span style="color:#d08770;">0x8a</span><span>, </span><span style="color:#d08770;">0x76</span><span>, </span><span style="color:#d08770;">0x2f</span><span>, </span><span style="color:#d08770;">0xb1</span><span>, </span><span style="color:#d08770;">0x57</span><span>, </span><span style="color:#d08770;">0xa2</span><span>, </span><span style="color:#d08770;">0xe1</span><span>, </span><span style="color:#d08770;">0x4f</span><span>, </span><span style="color:#d08770;">0xb9</span><span>, </span><span style="color:#d08770;">0x6f</span><span>, </span><span style="color:#d08770;">0x81</span><span>, </span><span style="color:#d08770;">0xbf</span><span>, </span><span style="color:#d08770;">0xb9</span><span>, </span><span style="color:#d08770;">0xbf</span><span>, </span><span style="color:#d08770;">0xe1</span><span>, </span><span style="color:#d08770;">0xef</span><span>, </span><span style="color:#d08770;">0x79</span><span>, </span><span style="color:#d08770;">0xcf</span><span>, </span><span style="color:#d08770;">0x01</span><span>, </span><span style="color:#d08770;">0xdf</span><span>, </span><span style="color:#d08770;">0xf9</span><span>, </span><span style="color:#d08770;">0x9f</span><span>, </span><span style="color:#d08770;">0xe1</span><span>, </span><span style="color:#d08770;">0x8f</span><span>, </span><span style="color:#d08770;">0x39</span><span>, </span><span style="color:#d08770;">0x2f</span><span>, </span><span style="color:#d08770;">0x81 </span><span>]
+</span></code></pre>
+<p>Then, I looked at how the flag is encrypted.</p>
+<pre data-lang="cpp" style="background-color:#2b303b;color:#c0c5ce;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#65737e;">// Need to decrypt with this
+</span><span>counter = </span><span style="color:#d08770;">0</span><span>;
+</span><span style="color:#b48ead;">do </span><span>{
+</span><span>    cVar1 = </span><span style="color:#bf616a;">FUN_001011e9</span><span>();
+</span><span>    *(byte *)((</span><span style="color:#b48ead;">long</span><span>)&amp;local_68 + counter) =
+</span><span>        *(byte *)((</span><span style="color:#b48ead;">long</span><span>)&amp;local_68 + counter) ^ cVar1 + (</span><span style="color:#b48ead;">char</span><span>)counter;
+</span><span>    counter = counter + </span><span style="color:#d08770;">1</span><span>;
+</span><span>} </span><span style="color:#b48ead;">while </span><span>(counter != </span><span style="color:#d08770;">0x40</span><span>);
+</span></code></pre>
+<p>I then re-wrote this function in python to decrypt our flag.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>counter = </span><span style="color:#d08770;">0 
+</span><span style="color:#b48ead;">for </span><span>byte </span><span style="color:#b48ead;">in </span><span>encrypted_flag:
+</span><span>    cVar1 = </span><span style="color:#bf616a;">FUN_001011e9</span><span>()
+</span><span>    decrypted_flag += </span><span style="color:#96b5b4;">chr</span><span>(byte ^ ((cVar1 + counter) &amp; </span><span style="color:#d08770;">0xff</span><span>))
+</span><span>    counter += </span><span style="color:#d08770;">1
+</span></code></pre>
+<p>But what about cVar1? What's <code>FUN_001011e9</code>? Let's take a look at that and add it to our python script.</p>
+<pre data-lang="cpp" style="background-color:#2b303b;color:#c0c5ce;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">FUN_001011e9</span><span>(</span><span style="color:#b48ead;">void</span><span>)
+</span><span>
+</span><span>{
+</span><span>  DAT_0010402c = DAT_0010402c * </span><span style="color:#d08770;">0x41c64e6d </span><span>+ </span><span style="color:#d08770;">0x3039 </span><span>&amp; </span><span style="color:#d08770;">0x7fffffff</span><span>;
+</span><span>  </span><span style="color:#b48ead;">return</span><span>;
+</span><span>}
+</span></code></pre>
+<p>Full solve script:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>encrypted_flag = [ </span><span style="color:#d08770;">0x74</span><span>, </span><span style="color:#d08770;">0x1a</span><span>, </span><span style="color:#d08770;">0x95</span><span>, </span><span style="color:#d08770;">0x4e</span><span>, </span><span style="color:#d08770;">0xba</span><span>, </span><span style="color:#d08770;">0xdb</span><span>, </span><span style="color:#d08770;">0x47</span><span>, </span><span style="color:#d08770;">0x64</span><span>, </span><span style="color:#d08770;">0x09</span><span>, </span><span style="color:#d08770;">0x2d</span><span>, </span><span style="color:#d08770;">0xd1</span><span>, </span><span style="color:#d08770;">0xbf</span><span>, </span><span style="color:#d08770;">0x8a</span><span>, </span><span style="color:#d08770;">0x9d</span><span>, </span><span style="color:#d08770;">0xde</span><span>, </span><span style="color:#d08770;">0x5a</span><span>, </span><span style="color:#d08770;">0xd7</span><span>, </span><span style="color:#d08770;">0x5c</span><span>, </span><span style="color:#d08770;">0x93</span><span>, </span><span style="color:#d08770;">0x16</span><span>, </span><span style="color:#d08770;">0x09</span><span>, </span><span style="color:#d08770;">0x3b</span><span>, </span><span style="color:#d08770;">0x30</span><span>, </span><span style="color:#d08770;">0x6f</span><span>, </span><span style="color:#d08770;">0x97</span><span>, </span><span style="color:#d08770;">0x40</span><span>, </span><span style="color:#d08770;">0xd0</span><span>, </span><span style="color:#d08770;">0x7c</span><span>, </span><span style="color:#d08770;">0x57</span><span>, </span><span style="color:#d08770;">0xdb</span><span>, </span><span style="color:#d08770;">0xde</span><span>, </span><span style="color:#d08770;">0x0c</span><span>, </span><span style="color:#d08770;">0x09</span><span>, </span><span style="color:#d08770;">0xa0</span><span>, </span><span style="color:#d08770;">0x84</span><span>, </span><span style="color:#d08770;">0x9b</span><span>, </span><span style="color:#d08770;">0x8a</span><span>, </span><span style="color:#d08770;">0x76</span><span>, </span><span style="color:#d08770;">0x2f</span><span>, </span><span style="color:#d08770;">0xb1</span><span>, </span><span style="color:#d08770;">0x57</span><span>, </span><span style="color:#d08770;">0xa2</span><span>, </span><span style="color:#d08770;">0xe1</span><span>, </span><span style="color:#d08770;">0x4f</span><span>, </span><span style="color:#d08770;">0xb9</span><span>, </span><span style="color:#d08770;">0x6f</span><span>, </span><span style="color:#d08770;">0x81</span><span>, </span><span style="color:#d08770;">0xbf</span><span>, </span><span style="color:#d08770;">0xb9</span><span>, </span><span style="color:#d08770;">0xbf</span><span>, </span><span style="color:#d08770;">0xe1</span><span>, </span><span style="color:#d08770;">0xef</span><span>, </span><span style="color:#d08770;">0x79</span><span>, </span><span style="color:#d08770;">0xcf</span><span>, </span><span style="color:#d08770;">0x01</span><span>, </span><span style="color:#d08770;">0xdf</span><span>, </span><span style="color:#d08770;">0xf9</span><span>, </span><span style="color:#d08770;">0x9f</span><span>, </span><span style="color:#d08770;">0xe1</span><span>, </span><span style="color:#d08770;">0x8f</span><span>, </span><span style="color:#d08770;">0x39</span><span>, </span><span style="color:#d08770;">0x2f</span><span>, </span><span style="color:#d08770;">0x81</span><span>, </span><span style="color:#d08770;">0xff </span><span>]
+</span><span>
+</span><span>cVar1 = </span><span style="color:#d08770;">0
+</span><span>
+</span><span>decrypted_flag = &#39;&#39;
+</span><span>
+</span><span>counter = </span><span style="color:#d08770;">0 
+</span><span style="color:#b48ead;">for </span><span>byte </span><span style="color:#b48ead;">in </span><span>encrypted_flag:
+</span><span>    cVar1 = cVar1 * </span><span style="color:#d08770;">0x41c64e6d </span><span>+ </span><span style="color:#d08770;">0x3039 </span><span>&amp; </span><span style="color:#d08770;">0x7fffffff
+</span><span>    decrypted_flag += </span><span style="color:#96b5b4;">chr</span><span>(byte ^ ((cVar1 + counter) &amp; </span><span style="color:#d08770;">0xff</span><span>))
+</span><span>    counter += </span><span style="color:#d08770;">1
+</span><span>
+</span><span style="color:#96b5b4;">print</span><span>(decrypted_flag)
+</span></code></pre>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">MetaCTF{pr0p3r_encrypt10n_1snt_s0_e4sy...}</p>
+</details>
+<hr />
+
+  </div>
+</div>
+
+    </div>
+  </section>
+</body>
+
+</html>

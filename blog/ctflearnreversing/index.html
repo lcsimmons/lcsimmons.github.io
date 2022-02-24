@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Lane Simmons 🤠</title>
+  <link rel="stylesheet" href="https://lcsimmons.github.io/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+  <header>  
+    <div class="nav">
+        <h3> 
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;lcsimmons.github.io&#x2F;">Lane Simmons </a></li>
+            <li><a href="/blog">Writeups </a></li>
+            <li><a href="https://github.com/lcsimmons">GitHub</a></li>
+          </ul>
+        </h3>
+    </div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<div class="container">
+  <h1 class="title">
+    CTFLearn Reversing
+  </h1>
+  
+  <div class="postcontainer">
+    <h3 id="table-of-contents">Table of Contents:</h3>
+<div class="toc">
+<ul>
+<li><a href="https://lcsimmons.github.io/blog/ctflearnreversing/#pin-medium">PIN (Medium)</a></li>
+<li><a href="https://lcsimmons.github.io/blog/ctflearnreversing/#reversedis-medium">REverseDIS (Medium)</a></li>
+<li><a href="https://lcsimmons.github.io/blog/ctflearnreversing/#pydis-medium">PyDis (Medium)</a></li>
+</ul>
+</div>
+<center>
+<h2 id="pin-medium">PIN (Medium)</h2>
+</center>
+<p>We are given <code>rev1</code> and our goal is to uncover the PIN. I loaded the binary into Ghidra and navigated to the main function. </p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>undefined8 </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#b48ead;">void</span><span>)
+</span><span>
+</span><span>{
+</span><span>  </span><span style="color:#b48ead;">int</span><span> iVar1;
+</span><span>  undefined4 local_c;
+</span><span>  
+</span><span>  </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Masukan PIN = </span><span>&quot;);
+</span><span>  </span><span style="color:#bf616a;">__isoc99_scanf</span><span>(&amp;DAT_004006d3,&amp;local_c);
+</span><span>  iVar1 = </span><span style="color:#bf616a;">cek</span><span>(local_c);
+</span><span>  </span><span style="color:#b48ead;">if </span><span>(iVar1 == </span><span style="color:#d08770;">0</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">PIN salah ! </span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">else </span><span>{
+</span><span>    </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">PIN benar ! </span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0</span><span>;
+</span><span>}
+</span></code></pre>
+<p>After glancing through this, I figured that local_c is what we input for the pin, and we want <code>cek(local_c)</code> to return 1, so I decided to look at <code>cek()</code></p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">bool </span><span style="color:#8fa1b3;">cek</span><span>(</span><span style="color:#b48ead;">int </span><span style="color:#bf616a;">param_1</span><span>)
+</span><span>
+</span><span>{
+</span><span>  </span><span style="color:#b48ead;">return</span><span> param_1 == valid;
+</span><span>}
+</span></code></pre>
+<p>This compares our input to <code>valid</code>, so we want our input to match <code>valid</code>'s value</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>valid                                           XREF[2]:     Entry Point(*), cek:004005bd(R)  
+</span><span>00601040 15 16 05 00     undefined4 00051615h
+</span></code></pre>
+<p>I converted <code>valid</code>'s hex value of <code>00051615</code> into decimal, giving us our PIN <code>333333</code></p>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">CTFLearn{333333}</p>
+</details>
+<hr />
+<center>
+<h2 id="reversedis-medium">REverseDIS (Medium)</h2>
+</center>
+<p>Ghidra time. </p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>undefined8 </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#b48ead;">void</span><span>)
+</span><span>
+</span><span>{
+</span><span>  </span><span style="color:#b48ead;">int</span><span> local_10;
+</span><span>  </span><span style="color:#b48ead;">int</span><span> local_c;
+</span><span>  
+</span><span>  </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Input password: </span><span>&quot;);
+</span><span>  </span><span style="color:#bf616a;">__isoc99_scanf</span><span>(&amp;DAT_001008f5,input);
+</span><span>  </span><span style="color:#b48ead;">for </span><span>(local_10 = </span><span style="color:#d08770;">0</span><span>; local_10 &lt; </span><span style="color:#d08770;">0x16</span><span>; local_10 = local_10 + </span><span style="color:#d08770;">1</span><span>) {
+</span><span>    *(</span><span style="color:#b48ead;">int </span><span>*)(key2 + (</span><span style="color:#b48ead;">long</span><span>)local_10 * </span><span style="color:#d08770;">4</span><span>) = (</span><span style="color:#b48ead;">int</span><span>)key[local_10];
+</span><span>    msg[local_10] =
+</span><span>         (byte)*(undefined4 *)(key2 + (</span><span style="color:#b48ead;">long</span><span>)local_10 * </span><span style="color:#d08770;">4</span><span>) ^
+</span><span>         (byte)*(undefined4 *)(str + (</span><span style="color:#b48ead;">long</span><span>)local_10 * </span><span style="color:#d08770;">4</span><span>);
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">for </span><span>(local_c = </span><span style="color:#d08770;">0</span><span>; local_c &lt; </span><span style="color:#d08770;">0x16</span><span>; local_c = local_c + </span><span style="color:#d08770;">1</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(input[local_c] != msg[local_c]) {
+</span><span>      stat = </span><span style="color:#d08770;">0</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">if </span><span>(stat == </span><span style="color:#d08770;">0</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">Wrong password</span><span>&quot;);
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">else </span><span>{
+</span><span>    </span><span style="color:#96b5b4;">puts</span><span>(&quot;</span><span style="color:#a3be8c;">Good job dude !!!</span><span>&quot;);
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0</span><span>;
+</span><span>}
+</span></code></pre>
+<p>At first, I thought that I would have to reverse the encryption, but as I was poking around, I found a lot of undefineds and figured that I probably didn't want to approach this statically.</p>
+<p>I did, however, note that the second for loop in <code>main</code> just checks to see if <code>input</code> == <code>msg</code> so I wanted to see if I could grab the value of <code>msg</code> at the end of main in gdb. </p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>gef➤  x/s 0x555555601140
+</span><span>0x555555601140 &lt;msg&gt;:   &quot;AbCTF{r3vers1ng_dud3}&quot;
+</span></code></pre>
+<hr />
+<center>
+<h2 id="pydis-medium">PyDis (Medium)</h2>
+</center>
+<p>We are given <code>dis.txt</code> with python bytecode and the output <code>éÿîÅËÎÞÃÙóÙÕÎÈÊúèÞÎÜÌÌÕÓÕìùÂéçÆÐþÿñÖËîÿôÿ</code>.</p>
+<p>Using https://docs.python.org/3/library/dis.html for reference, I translated the bytecode back into python.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">func2</span><span>(</span><span style="color:#bf616a;">c1</span><span>,</span><span style="color:#bf616a;">c2</span><span>):
+</span><span>    tmp1 = c2
+</span><span>    tmp2 = c1
+</span><span>    </span><span style="color:#b48ead;">return </span><span>tmp1 ^ tmp2
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">func</span><span>():
+</span><span>    fp = </span><span style="color:#96b5b4;">open</span><span>(&#39;</span><span style="color:#a3be8c;">flag.txt</span><span>&#39;).</span><span style="color:#bf616a;">read</span><span>()
+</span><span>    cipher = &#39;&#39;
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#96b5b4;">len</span><span>(fp)): </span><span style="color:#65737e;">#range(70?) #FOR_ITER(delta)
+</span><span>        temp = </span><span style="color:#bf616a;">func2</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(fp[i]), </span><span style="color:#d08770;">170</span><span>) </span><span style="color:#65737e;">#BINARY_SUBSCR TOS1[TOS]
+</span><span>        cipher = cipher + </span><span style="color:#96b5b4;">chr</span><span>(</span><span style="color:#bf616a;">func2</span><span>(temp,i))
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>(cipher)
+</span><span>    f = </span><span style="color:#96b5b4;">open</span><span>(&#39;</span><span style="color:#a3be8c;">encrypted_flag.txt</span><span>&#39;, &#39;</span><span style="color:#a3be8c;">w</span><span>&#39;)
+</span><span>    f.</span><span style="color:#bf616a;">write</span><span>(cipher)
+</span></code></pre>
+<p>I then used this to decrypt the given output.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>output = &quot;</span><span style="color:#a3be8c;">éÿîÅËÎÞÃÙóÙÕÎÈÊúèÞÎÜÌÌÕÓÕìùÂéçÆÐþÿñÖËîÿôÿ</span><span>&quot;
+</span><span>decrypted = &#39;&#39;
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#96b5b4;">len</span><span>(output)):
+</span><span>    temp = </span><span style="color:#bf616a;">func2</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(output[i]), </span><span style="color:#d08770;">170</span><span>)
+</span><span>    decrypted += </span><span style="color:#96b5b4;">chr</span><span>(</span><span style="color:#bf616a;">func2</span><span>(temp,i))
+</span><span style="color:#96b5b4;">print</span><span>(decrypted)
+</span></code></pre>
+<details>
+  <summary id="reveal-flag">Reveal Flag</summary>
+  <p id="flag">CTFlearn{Python_Reversing_Is_Pretty_Easy}</p>
+</details>
+
+  </div>
+</div>
+
+    </div>
+  </section>
+</body>
+
+</html>
